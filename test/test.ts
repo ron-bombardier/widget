@@ -17,8 +17,8 @@ describe('TonicPow.js loaded', () => {
     expect(typeof window.TonicPow === 'object', 'TonicPow is not object')
   })
 
-  it('TonicPow.Storage should be set', () => {
-    assert(typeof window.TonicPow.storage === 'object', 'Storage is not object')
+  it('TonicPow.Cache should be set', () => {
+    assert(typeof window.TonicPow.cache === 'object', 'Cache is not object')
   })
 
   it('TonicPow.Config should be set', () => {

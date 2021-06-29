@@ -91,5 +91,8 @@
   "lint-staged": {
     "*.{ts,js}": "eslint --cache --fix",
     "*.{ts,js,css,md}": "prettier --write"
+  },
+  "dependencies": {
+    "money-clip": "^3.0.3"
   }
 }

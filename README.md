@@ -46,7 +46,7 @@
 <summary><strong><code>Get Visitor Session</code></strong></summary>
 
 ```javascript
-let session = window.TonicPow.getVisitorSession()
+let session = await window.TonicPow.getVisitorSession()
 console.log(session) // 1b40c235dd9532213f5d611ffz06f9dd018efeffad8d6fbc35dc421fed18babz
 ```
 

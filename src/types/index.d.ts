@@ -20,8 +20,8 @@ declare namespace TPow {
   }
 
   export function setOreo(name: string, value: string, days: number): void
-  export function captureVisitorSession(customSessionId: string): Capture
-  export function getVisitorSession(): string | null
+  export function captureVisitorSession(customSessionId: string): Promise<Capture>
+  export function getVisitorSession(): Promise<string | null>
   export function loadDivs(): Promise<void>
   export function load(): Promise<void>
 
@@ -67,16 +67,14 @@ declare namespace TPow {
     isEnvironmentValid(env: string): boolean
   }
 
-  export class Storage {
-    getStorage(key: string): string | null
-    removeStorage(name: string): boolean
-    setStorage(key: string, value: string, expires: number | null): boolean
+  interface onSuccessFunction {
+    (data: Record<string, string>): void
   }
-
-  interface onSuccessFunction { (data: Record<string, string>): void }
-  interface onErrorFunction { (data: Record<string, string>): void }
+  interface onErrorFunction {
+    (data: Record<string, string>): void
+  }
   export interface ShareButtonOptions {
-    [key: string]: any;
+    [key: string]: any
   }
 
   export type _ShareButtonOptions = {

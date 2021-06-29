@@ -1,24 +1,27 @@
 import Config from './config'
 import Events from './events'
-import Storage from './storage'
 import TPow from './types'
+import { getConfiguredCache, MoneyClip } from 'money-clip'
 
 export default class TonicPow {
   config: Config
-  storage: Storage
   events: Events | undefined
   widgets: Map<string, TPow.Widget | null>
   options: TPow.TonicPowOptions | undefined
   buttonViewsInitialized: boolean
   shareButtons: Map<string, TPow.ShareButtonOptions>
   nrOfButtons: number
+  cache: MoneyClip
 
   constructor(options?: TPow.TonicPowOptions) {
     // Set namespaces
     this.config = new Config()
-    this.storage = new Storage()
     this.widgets = new Map<string, TPow.Widget>()
     this.options = options
+    this.cache = getConfiguredCache({
+      version: 1,
+      name: 'tonic-pow-widget',
+    })
 
     this.buttonViewsInitialized = false
     this.shareButtons = new Map<string, TPow.ShareButtonOptions>()
@@ -48,7 +51,10 @@ export default class TonicPow {
   // captureVisitorSession will capture the session and store it
   // Builds a cookie so it's sent on requests automatically
   // Stores in local storage for easy access from the application
-  captureVisitorSession = (customSessionId = '', customChallengeGuid = ''): TPow.Capture => {
+  captureVisitorSession = async (
+    customSessionId = '',
+    customChallengeGuid = ''
+  ): Promise<TPow.Capture> => {
     let sessionId: string | null = customSessionId
     let challengeGuid: string | null = customChallengeGuid
     const urlParams = new URLSearchParams(window.location.search)
@@ -62,22 +68,23 @@ export default class TonicPow {
 
     if (sessionId && sessionId.length > 0) {
       this.setOreo(this.config.sessionParameterName, sessionId, this.config.maxSessionDays)
-      this.storage.setStorage(
+      this.cache.set(
         this.config.sessionParameterName,
         sessionId,
-        24 * 60 * 60 * this.config.maxSessionDays
+        1000 * 24 * 60 * 60 * this.config.maxSessionDays
       )
     }
 
     if (challengeGuid && challengeGuid.length > 0) {
       // 60 = 1 minute - will be read by headless browser
-      this.storage.setStorage(this.config.challengeParameterName, challengeGuid, 60)
+      this.cache.set(this.config.challengeParameterName, challengeGuid, 60 * 1000)
     }
     return { sessionId: sessionId, challengeGuid: challengeGuid }
   }
 
   // getVisitorSession will get the session if it exists
-  getVisitorSession = (): string | null => this.storage.getStorage(this.config.sessionParameterName)
+  getVisitorSession = (): Promise<string | null> =>
+    this.cache.get<string | null>(this.config.sessionParameterName)
 
   // loadDivs replaces each TonicPow div with a corresponding embed widget
   loadDivs = async (): Promise<void> => {
@@ -320,7 +327,7 @@ export default class TonicPow {
     }
 
     // Process visitor token
-    const { sessionId, challengeGuid } = this.captureVisitorSession()
+    const { sessionId, challengeGuid } = await this.captureVisitorSession()
 
     // Capture events if we have a session, or responding to a challenge
     if (sessionId || challengeGuid) {
