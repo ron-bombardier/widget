@@ -7,17 +7,31 @@ let config = {
     rules: [
       {
         test: /\.ts?$/,
-        use: 'ts-loader',
         exclude: /node_modules/,
-      }
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              '@babel/typescript',
+              [
+                '@babel/preset-env',
+                {
+                  targets: { browsers: '> 0.5% and not dead and not ie 11' },
+                  bugfixes: true,
+                },
+              ],
+            ],
+          },
+        },
+      },
     ],
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
   },
   stats: {
-    errorDetails: true
-  }
+    errorDetails: true,
+  },
 }
 
 // Build a version for widgets (deprecated)
